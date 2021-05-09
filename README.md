@@ -1,5 +1,6 @@
 # piecework-calculator
 
+Hello World!
 
 Making a piecework-calculator for use in my daywork, in the process learning more about android-development, version control and programming in general.
 The calculator will be used for calculating how long an order 'should' take using the pace(hourly wage) selected by the user.
