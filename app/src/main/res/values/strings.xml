@@ -10,5 +10,10 @@
     <string name="countdowner">%1$d</string>
     <string name="betalning_input">%1$d</string>
     <string name="todo">TODO</string>
+    <string name="two_decimal_input">%1$s0</string>
+    <string name="On_Finish">Finished</string>
+    <string name="order_in_minutes">%1$s min</string>
+
+
 
 </resources>

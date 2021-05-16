@@ -10,6 +10,8 @@ import androidx.core.widget.doAfterTextChanged
 import com.pluggamest.test.databinding.ActivityMainBinding
 import java.util.*
 import android.view.View
+import java.text.SimpleDateFormat
+import kotlin.math.roundToInt
 import kotlin.time.seconds
 
 
@@ -17,6 +19,8 @@ class MainActivity : AppCompatActivity() {
 
     lateinit var binding: ActivityMainBinding
     var counter: Double = 0.0
+    private lateinit var timer: CountDownTimer
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,7 +45,7 @@ class MainActivity : AppCompatActivity() {
         binding.ETA.text = getString(R.string.eta, hours, minutes)
 
 
-        var takt: Int = 146
+        var takt = 146
         binding.seekBarTakt.setProgress(20)
 
 
@@ -75,12 +79,21 @@ class MainActivity : AppCompatActivity() {
 
         binding.countdownStart.setOnClickListener {
             countdownStart(takt)
-
         }
 
         binding.fabStart.setOnClickListener{
             startTimeCounter()
+            binding.fabReset.visibility = View.VISIBLE
         }
+
+        binding.fabReset.setOnClickListener{
+            timer.cancel()
+            counter = 0.0
+            binding.countTime.text = ""
+            binding.orderMinutes.text = ""
+        }
+
+
     }
 
     private fun countdownStart(takt: Int) {
@@ -90,18 +103,20 @@ class MainActivity : AppCompatActivity() {
             binding.betalningInput.setText(R.string.basbetalning)
             return
         }
-        binding.betalningInput.setText(inputbetalning.toString()+"0")
-        val taktackord : Double= takt.toDouble() - 83.toDouble()
-        val input: Double = binding.betalningInput.text.toString().toDouble()
+        binding.betalningInput.setText(getString(R.string.two_decimal_input, inputbetalning.toString()))
+        var taktackord : Double= takt.toDouble() - 83.toDouble()
+        var input: Double = binding.betalningInput.text.toString().toDouble()
         var result: Double = input / taktackord
-        result = Math.round(result * 100) / 100.0
+        result = (result * 100).roundToInt() / 100.0
+        var order_in_minutes = result*60
         counter = result*3600
-        binding.countdown.text = result.toString()
+        binding.orderMinutes.text = getString(R.string.order_in_minutes, order_in_minutes.toString())
     }
 
 
+
     fun startTimeCounter(){
-        object : CountDownTimer(30000, 1000){
+       timer =  object : CountDownTimer(counter.toLong()*1000, 1000){
             override fun onTick(millisUntilFinished: Long) {
 
                 binding.countTime.text = counter.toString()
@@ -109,9 +124,11 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onFinish() {
-                binding.countTime.text = "Finished"
+                binding.countTime.text = getString(R.string.On_Finish)
             }
         }.start()
     }
+
+
 
 }
