@@ -2,23 +2,37 @@ package com.pluggamest.test
 
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.widget.EditText
 import android.widget.SeekBar
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.widget.doAfterTextChanged
 import com.pluggamest.test.databinding.ActivityMainBinding
 import java.util.*
 import android.view.View
-import java.text.SimpleDateFormat
 import kotlin.math.roundToInt
-import kotlin.time.seconds
+
+
+class workOrder(private var orderValue: Double, private var orderPace: Double){
+    fun get_Value(): Double {
+        return orderValue
+    }
+    fun set_Value(set_Value: Double) {
+        orderValue = set_Value
+    }
+    fun get_Pace(): Double {
+        return orderPace
+    }
+    fun set_Pace(set_Pace: Double) {
+        orderPace = set_Pace
+    }
+
+}
 
 
 class MainActivity : AppCompatActivity() {
 
+
     lateinit var binding: ActivityMainBinding
     var counter: Double = 0.0
+    var orderminutes: Int = 0
     private lateinit var timer: CountDownTimer
 
 
@@ -30,30 +44,55 @@ class MainActivity : AppCompatActivity() {
 
 
 
-        val c = Calendar.getInstance()
-        val hour = c.get(Calendar.HOUR_OF_DAY)
-        var hours: String = hour.toString()
-        if (hour < 10){
-            hours = "0$hours"
+
+
+
+
+        fun displayETA(minutes_add: Int, hours_add: Int){
+            val c = Calendar.getInstance()
+            var minute = c.get(Calendar.MINUTE) + minutes_add
+            var hour = c.get(Calendar.HOUR_OF_DAY) + hours_add
+
+
+            if(minute>59) {
+                minute = minute-60
+                hour += 1
+            }
+            var minutes: String = minute.toString()
+            if (minute < 10) minutes = "0$minutes"
+
+            if(hour>23) hour = hour-24
+            var hours: String = hour.toString()
+            if (hour < 10) hours = "0$hours"
+
+
+            binding.ETA.text = getString(R.string.eta, hours, minutes)
+
         }
 
-        val minute = c.get(Calendar.MINUTE)
-        var minutes: String = minute.toString()
-        if (minute < 10){
-            minutes = "0$minutes"
+        fun calculateETA(){
+
+            if(orderminutes != 0 ) {
+                val minutes_add =  orderminutes % 60
+                val hours_add = (orderminutes - minutes_add) / 60
+                displayETA(minutes_add, hours_add)
+            }
+
         }
-        binding.ETA.text = getString(R.string.eta, hours, minutes)
 
 
-        var takt = 146
+
+
+
+        var pace = 146
         binding.seekBarTakt.setProgress(20)
 
 
         binding.seekBarTakt.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 val bas_timlon = 120
-                takt = progress + bas_timlon
-                val bas_and_kronor_string: String = takt.toString()
+                pace = progress + bas_timlon
+                val bas_and_kronor_string: String = pace.toString()
                 // Write code to perform some action when progress is changed.
 
                 //bindingETA.text = hours + ":" + minutes
@@ -77,8 +116,9 @@ class MainActivity : AppCompatActivity() {
 
 
 
-        binding.countdownStart.setOnClickListener {
-            countdownStart(takt)
+        binding.countdownSet.setOnClickListener {
+            countdownStart(pace)
+            calculateETA()
         }
 
         binding.fabStart.setOnClickListener{
@@ -91,12 +131,19 @@ class MainActivity : AppCompatActivity() {
             counter = 0.0
             binding.countTime.text = ""
             binding.orderMinutes.text = ""
+            binding.ETA.text = ""
+
         }
 
 
     }
 
-    private fun countdownStart(takt: Int) {
+
+
+
+
+
+    private fun countdownStart(pace: Int) {
         val stringInTextField = binding.betalningInput.text.toString()
         val inputbetalning = stringInTextField.toDoubleOrNull()
         if (inputbetalning == null || inputbetalning == 0.0) {
@@ -104,13 +151,15 @@ class MainActivity : AppCompatActivity() {
             return
         }
         binding.betalningInput.setText(getString(R.string.two_decimal_input, inputbetalning.toString()))
-        var taktackord : Double= takt.toDouble() - 83.toDouble()
+        var taktackord : Double= pace.toDouble() - 83.toDouble()
         var input: Double = binding.betalningInput.text.toString().toDouble()
         var result: Double = input / taktackord
         result = (result * 100).roundToInt() / 100.0
         var order_in_minutes = result*60
+        //val orderminutes: Int = order_in_minutes.toInt()
+        orderminutes = order_in_minutes.toInt()
         counter = result*3600
-        binding.orderMinutes.text = getString(R.string.order_in_minutes, order_in_minutes.toString())
+        binding.orderMinutes.text = getString(R.string.order_in_minutes, orderminutes.toString())
     }
 
 
@@ -119,7 +168,7 @@ class MainActivity : AppCompatActivity() {
        timer =  object : CountDownTimer(counter.toLong()*1000, 1000){
             override fun onTick(millisUntilFinished: Long) {
 
-                binding.countTime.text = counter.toString()
+                binding.countTime.text = counter.toInt().toString()
                 counter--
             }
 
@@ -128,6 +177,7 @@ class MainActivity : AppCompatActivity() {
             }
         }.start()
     }
+
 
 
 
